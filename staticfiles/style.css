@@ -1,0 +1,15 @@
+body {
+color: gray;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #db5e1a;
+}
+
+.menu {
+display: flex;
+align-items: space-around;
+}
