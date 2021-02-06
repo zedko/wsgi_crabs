@@ -1,4 +1,4 @@
-from os import path, getcwd
+from os import path
 
 CONTENT_TYPES_MAP = {
         ".3gp": "video/3gpp",
@@ -109,27 +109,38 @@ class App:
         self.settings = settings
         self.router = routes if routes else self.settings.ROUTES
         self.middleware = middleware if middleware else self.settings.MIDDLEWARE
+        self.request_handlers = {
+            'GET': self.GET_request_handler,
+            'POST': self.POST_request_handler,
+        }
 
     def __call__(self, environ, start_response):
-        print('=' * 10)
-        for (key, value) in environ.items():
-            print(key, value)
-        print('+' * 10)
+        # if environ['REQUEST_METHOD']=="POST":
+        #     print('=' * 10)
+        #     for (key, value) in environ.items():
+        #         print(key, value)
+        #     print('+' * 10)
 
-        url_path: str = environ['PATH_INFO']
+        url_path: str = self.fix_url_slash(environ['PATH_INFO'])
         content_type: str = "text/html"
 
-        request = {}
+        request = {
+            'method': environ['REQUEST_METHOD'],
+            'query_string': self.parse_query_str(environ['QUERY_STRING']),
+            'url': url_path,
+            'body': environ['wsgi.input']
+        }
         for ware in self.middleware:
             ware(request)
 
-        # make sure that both URL (in environ['PATH_info'] and in routes dict) have slashes as last symbol
-        if self.fix_url_slash(url_path) in (self.fix_url_slash(key) for key in self.router.keys()):
-            data, status = self.router[url_path](request)
+        print(f'{request["method"]} request to {request["url"]}')
+
+        if url_path in self.router.keys():
+            data, status = self.request_handlers[request['method']](url_path, request)
             binary_data = data.encode(encoding='utf-8')
         # static delivery
         elif url_path.startswith(self.settings.STATIC_URL):
-            file_path = url_path[len(self.settings.STATIC_URL):]
+            file_path = url_path[len(self.settings.STATIC_URL):len(url_path)-1]  # /static/img/logo.jpg/ -> img/logo.jpg
             content_type = self.get_content_type(file_path)
             binary_data, status = self.get_static(self.settings.STATIC_FILES_DIR, file_path)
         else:
@@ -144,6 +155,30 @@ class App:
 
         return [binary_data]
 
+    def GET_request_handler(self, url, request):
+        data, status = self.router[url](request)
+        return data, status
+
+    def POST_request_handler(self, url, request):
+        request['body'] = self.parse_query_str(request['body'].read().decode())
+        data, status = self.router[url](request)
+        return data, status
+
+    @staticmethod
+    def parse_query_str(query_str: str):
+        """
+        Turns QUERY_STRING format like 'fname=John&lname=Doe' into dict like {'fname': 'John', 'lname': 'Doe'}
+        """
+        try:
+            list_of_key_values = query_str.split('&')  # getting a list of strings ['fname=John', 'lname=Doe']
+            dict_of_key_values = dict(map(lambda key_val: key_val.split("="), list_of_key_values))
+            return dict_of_key_values
+        except ValueError:
+            return query_str
+
+
+
+
     @staticmethod
     def fix_url_slash(path: str):
         """
@@ -155,9 +190,7 @@ class App:
 
     @staticmethod
     def get_static(static_dir, file_path):
-        # TODO define root dir in settings
         path_to_file = path.join(static_dir, file_path)
-        print(path_to_file, getcwd())
         with open(path_to_file, 'rb') as f:
             file_content = f.read()
         status_code = '200 OK'
@@ -180,8 +213,8 @@ def response_404(request):
 
 
 if __name__ == '__main__':
-    import crabs_project.settings as settings
+    import crabs_project.settings as proj_settings
     from crabs_project.urls import router
     from crabs_project.middleware import middleware_list
-    app = App(settings, routes=router, middleware=middleware_list)
+    app = App(proj_settings, routes=router, middleware=middleware_list)
 

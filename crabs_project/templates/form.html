@@ -9,15 +9,19 @@
 <div class="header">
     <nav class="menu">
             <a href="/">Insulamon palawanense</a>
-            <a href="/form"><img src="/static/img/logo.png"></a>
+            <img src="/static/img/logo.png">
             <a href="/second">Macrocheira kaempferi</a>
 
     </nav>
 </div>
 <div class="middle">
-    <h1>{{ name }}</h1>
-    <img src="/static/img/Insulamon_palawanense.jpg" />
-    <p> {{ text }} </p>
+   <form method="post">
+      <label for="fname">First name:</label><br>
+      <input type="text" id="fname" name="fname" value="John"><br>
+      <label for="lname">Last name:</label><br>
+      <input type="text" id="lname" name="lname" value="Doe"><br><br>
+      <input type="submit" value="Submit">
+    </form>
 </div>
 </body>
 </html>
