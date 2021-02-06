@@ -1,0 +1,1 @@
+import crabs_project.middleware, crabs_project.urls

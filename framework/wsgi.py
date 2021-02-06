@@ -1,10 +1,4 @@
-from crabs_project.urls import router
-from crabs_project.middleware import middleware_list
 from os import path, getcwd
-
-# TODO move all settings to project scoped file
-STATIC_FILES_DIR = 'staticfiles'
-STATIC_URL = '/static/'
 
 CONTENT_TYPES_MAP = {
         ".3gp": "video/3gpp",
@@ -111,9 +105,10 @@ CONTENT_TYPES_MAP = {
 
 
 class App:
-    def __init__(self, routes: dict, middleware: list):
-        self.router = routes
-        self.middleware = middleware
+    def __init__(self, settings, routes=None, middleware=None):
+        self.settings = settings
+        self.router = routes if routes else self.settings.ROUTES
+        self.middleware = middleware if middleware else self.settings.MIDDLEWARE
 
     def __call__(self, environ, start_response):
         print('=' * 10)
@@ -129,14 +124,14 @@ class App:
             ware(request)
 
         # make sure that both URL (in environ['PATH_info'] and in routes dict) have slashes as last symbol
-        if self.fix_url_slash(url_path) in (self.fix_url_slash(key) for key in router.keys()):
+        if self.fix_url_slash(url_path) in (self.fix_url_slash(key) for key in self.router.keys()):
             data, status = self.router[url_path](request)
             binary_data = data.encode(encoding='utf-8')
         # static delivery
-        elif url_path.startswith(STATIC_URL):
-            file_path = url_path[len(STATIC_URL):]
+        elif url_path.startswith(self.settings.STATIC_URL):
+            file_path = url_path[len(self.settings.STATIC_URL):]
             content_type = self.get_content_type(file_path)
-            binary_data, status = self.get_static(STATIC_FILES_DIR, file_path)
+            binary_data, status = self.get_static(self.settings.STATIC_FILES_DIR, file_path)
         else:
             data, status = response_404(request)
             binary_data = data.encode(encoding='utf-8')
@@ -169,9 +164,9 @@ class App:
         return file_content, status_code
 
     @staticmethod
-    def get_content_type(file_path, content_types_map = CONTENT_TYPES_MAP):
+    def get_content_type(file_path, content_types_map=CONTENT_TYPES_MAP):
         file_name = path.basename(file_path).lower()
-        media_type = content_types_map.get(file_name)
+        media_type = content_types_map.get(file_name, None)
         if media_type is not None:
             return media_type
         extension = path.splitext(file_name)[1]
@@ -184,4 +179,9 @@ def response_404(request):
     return content_text, status_code
 
 
-app = App(router, middleware_list)
+if __name__ == '__main__':
+    import crabs_project.settings as settings
+    from crabs_project.urls import router
+    from crabs_project.middleware import middleware_list
+    app = App(settings, routes=router, middleware=middleware_list)
+
