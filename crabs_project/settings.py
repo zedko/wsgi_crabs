@@ -1,4 +1,4 @@
-import crabs_project
+import crabs_project.urls, crabs_project.middleware
 import os
 
 ROOT_DIR = os.path.join('../', os.path.abspath(os.curdir))
