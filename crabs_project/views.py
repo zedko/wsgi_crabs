@@ -1,5 +1,7 @@
 from jinja2 import Environment, PackageLoader, select_autoescape
+from mods.loggar import Loggar
 
+log = Loggar()
 # import crabs_project.settings as settings
 
 env = Environment(
@@ -20,6 +22,7 @@ def index(request):
     print(request['query_string'])
     content_text = template.render(content)
     status_code = '200 OK'
+    log.info(f'{request["url"]}, {status_code}')
     return content_text, status_code
 
 

@@ -107,7 +107,7 @@ CONTENT_TYPES_MAP = {
 class App:
     def __init__(self, settings, routes=None, middleware=None):
         self.settings = settings
-        self.router = routes if routes else self.settings.ROUTES
+        self.router = routes
         self.middleware = middleware if middleware else self.settings.MIDDLEWARE
         self.request_handlers = {
             'GET': self.GET_request_handler,
@@ -175,9 +175,6 @@ class App:
             return dict_of_key_values
         except ValueError:
             return query_str
-
-
-
 
     @staticmethod
     def fix_url_slash(path: str):
