@@ -106,9 +106,11 @@ CONTENT_TYPES_MAP = {
 
 
 class App:
-    def __init__(self, settings, routes=None, middleware=None):
+    router = {}
+
+    def __init__(self, settings, routes: dict=None, middleware:list=None):
         self.settings = settings
-        self.router = routes
+        self.router = {**App.router, **routes}
         self.middleware = middleware if middleware else self.settings.MIDDLEWARE
         self.request_handlers = {
             'GET': self.GET_request_handler,
@@ -156,15 +158,15 @@ class App:
 
         return [binary_data]
 
-    # Cannot use it due to bad architecture
-    # def add_route(self, url: str):
-    #     """
-    #     Decorator that adds a route ( url = view )
-    #     """
-    #     def inner(view):
-    #         self.router[url] = view
-    #
-    #     return inner
+    @classmethod
+    def add_route(cls, url: str):
+        """
+        Decorator that adds a route ( url = view )
+        """
+        def inner(view):
+            cls.router[url] = view
+
+        return inner
 
     def GET_request_handler(self, url, request):
         data, status = self.router[url](request)
