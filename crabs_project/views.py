@@ -1,5 +1,5 @@
 import crabs_project.settings as settings
-from jinja2 import Environment, PackageLoader, select_autoescape
+from framework.render import render
 from crabs_project.models import AppData, Student, Chef
 from mods.loggar import Loggar
 from mods.work_time import work_time
@@ -10,20 +10,15 @@ log = Loggar()
 app_data = AppData()
 app_data.set_test_data()
 
+static_url = settings.STATIC_URL
+jinja_loader_params = ('crabs_project', 'templates')
 
-env = Environment(
-    loader=PackageLoader('crabs_project', 'templates'),
-    autoescape=select_autoescape(['html', 'xml'])
-)
-
-env.globals['static'] = settings.STATIC_URL
 
 @work_time
 def index(request):
-    template = env.get_template('index.html')
     content = app_data.get_context_data('courses', 'professions', 'users')
     content['user'] = app_data.get_active_user()
-    content_text = template.render(content)
+    content_text = render('index.html', loader_params=jinja_loader_params, static_url=static_url, **content)
     status_code = '200 OK'
     log.info(f'{request["url"]}, {status_code}')
     return content_text, status_code
@@ -36,10 +31,9 @@ def non_index(request):
 
 
 def participate(request):
-    template = env.get_template('participate.html')
     content = app_data.get_context_data('courses', 'professions', 'users')
     content['user'] = app_data.get_active_user()
-    content_text = template.render(content)
+    content_text = render('participate.html', loader_params=jinja_loader_params, static_url=static_url, **content)
     status_code = '200 OK'
     if request['method'] == 'POST':
         print("QUERY STRING: ", request['body'])
@@ -63,20 +57,18 @@ def courses(request):
     if request['method'] == 'POST':
         course_data = request['body']
         app_data.add_course(**course_data)
-    template = env.get_template('courses.html')
     content = app_data.get_context_data('courses', 'users')
     content['user'] = app_data.get_active_user()
-    content_text = template.render(content)
+    content_text = render('courses.html', loader_params=jinja_loader_params, static_url=static_url, **content)
     status_code = '200 OK'
     return content_text, status_code
 
 
 def professions(request):
-    template = env.get_template('professions.html')
     content = app_data.get_context_data('professions', 'users')
     content['user'] = app_data.get_active_user()
 
-    content_text = template.render(content)
+    content_text = render('professions.html', loader_params=jinja_loader_params, static_url=static_url, **content)
     status_code = '200 OK'
     return content_text, status_code
 
