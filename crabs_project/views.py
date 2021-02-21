@@ -1,4 +1,5 @@
 import crabs_project.settings as settings
+from framework.wsgi import App
 from framework.render import render
 from crabs_project.models import AppData, Student, Chef
 from mods.loggar import Loggar
@@ -73,10 +74,14 @@ def professions(request):
     return content_text, status_code
 
 
+@App.add_route('/test/')
 def buy_course(request):
     for __, _ in request.items():
         print(__, _)
     if request['method'] == 'POST':
         print('ALRIGHT')
+    status_code = '200 OK'
+    content_text = "It worked"
+    return content_text, status_code
 
 
