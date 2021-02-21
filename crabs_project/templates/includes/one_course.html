@@ -1,0 +1,23 @@
+<div class="col-md-6 col-lg-4 menu-wrap">
+    <div class="menus d-flex ftco-animate">
+        <div class="menu-img img" style="background-image: url({{ static }}{{ course.img }});">
+        </div>
+        <div class="text">
+            <div class="d-flex">
+                <div class="one-half">
+                    <h3> {{ course.title }}  </h3>
+
+                </div>
+                <div class="one-forth">
+                    <span class="price">${{ course.price }}</span>
+                </div>
+        </div>
+        <p> {{ course.desc }} </p>
+        {% if course in user.courses %}
+            <p> OWNED </p>
+        {% else %}
+            <p> <a href="?course={{ course.title }}"> BUY </a> </p>
+        {% endif %}
+        </div>
+    </div>
+</div>

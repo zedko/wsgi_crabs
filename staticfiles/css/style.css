@@ -8653,10 +8653,19 @@ h1, h2, h3, h4, h5,
 .menu-wrap {
   margin-bottom: 3em; }
 
+.heading-menu {
+    margin-bottom: 1em;
+    }
+
 .heading-menu h3 {
   font-size: 22px;
   font-weight: 600;
-  margin-bottom: 2em; }
+   }
+
+ .heading-menu .price {
+  font-size: 18px;
+  font-weight: 400;
+  }
 
 .menus {
   width: 100%;

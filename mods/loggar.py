@@ -36,7 +36,7 @@ class Loggar:
             with open(self._file, 'a') as f:
                 f.write(f'{self.message_prefix}{log_message} \n')
 
-    def info(self, log_message: str):
+    def warning(self, log_message: str):
         if self._level in ['info', 'warning']:
             with open(self._file, 'a') as f:
-                f.write(f'{self.message_prefix}{log_message} \n')
+                f.write(f'{self.message_prefix}:!!! WARNING !!!:{log_message} \n')

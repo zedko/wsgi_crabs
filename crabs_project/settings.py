@@ -1,8 +1,11 @@
 import crabs_project.middleware
 import os
+from pathlib import Path
 from mods.loggar import Loggar
 
-ROOT_DIR = os.path.join('../', os.path.abspath(os.getcwd()))
+DEBUG = False
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
 STATIC_FILES_DIR = os.path.join(ROOT_DIR, 'staticfiles')
 STATIC_URL = '/static/'  # all urls that starts with STATIC_URL will be considered as request for static file
 MIDDLEWARE = crabs_project.middleware.middleware_list
