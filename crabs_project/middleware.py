@@ -1,5 +1,5 @@
 def add_custom_header(request):
-    request['header'] = "CUSTOM_HEADER_VALUE"
+    request['header'] = 'test_header_value'
 
 
 middleware_list = [

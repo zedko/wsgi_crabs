@@ -1,4 +1,5 @@
 from os import path
+from urllib.parse import unquote
 
 CONTENT_TYPES_MAP = {
         ".3gp": "video/3gpp",
@@ -107,7 +108,7 @@ CONTENT_TYPES_MAP = {
 class App:
     def __init__(self, settings, routes=None, middleware=None):
         self.settings = settings
-        self.router = routes if routes else self.settings.ROUTES
+        self.router = routes
         self.middleware = middleware if middleware else self.settings.MIDDLEWARE
         self.request_handlers = {
             'GET': self.GET_request_handler,
@@ -115,11 +116,11 @@ class App:
         }
 
     def __call__(self, environ, start_response):
-        # if environ['REQUEST_METHOD']=="POST":
-        #     print('=' * 10)
-        #     for (key, value) in environ.items():
-        #         print(key, value)
-        #     print('+' * 10)
+        if self.settings.DEBUG:
+            print('=' * 10)
+            for (key, value) in environ.items():
+                print(key, value)
+            print('+' * 10)
 
         url_path: str = self.fix_url_slash(environ['PATH_INFO'])
         content_type: str = "text/html"
@@ -133,7 +134,7 @@ class App:
         for ware in self.middleware:
             ware(request)
 
-        print(f'{request["method"]} request to {request["url"]}')
+        # print(f'{request["method"]} request to {request["url"]}')
 
         if url_path in self.router.keys():
             data, status = self.request_handlers[request['method']](url_path, request)
@@ -155,6 +156,16 @@ class App:
 
         return [binary_data]
 
+    # Cannot use it due to bad architecture
+    # def add_route(self, url: str):
+    #     """
+    #     Decorator that adds a route ( url = view )
+    #     """
+    #     def inner(view):
+    #         self.router[url] = view
+    #
+    #     return inner
+
     def GET_request_handler(self, url, request):
         data, status = self.router[url](request)
         return data, status
@@ -170,14 +181,12 @@ class App:
         Turns QUERY_STRING format like 'fname=John&lname=Doe' into dict like {'fname': 'John', 'lname': 'Doe'}
         """
         try:
+            query_str = unquote(query_str)
             list_of_key_values = query_str.split('&')  # getting a list of strings ['fname=John', 'lname=Doe']
             dict_of_key_values = dict(map(lambda key_val: key_val.split("="), list_of_key_values))
             return dict_of_key_values
         except ValueError:
             return query_str
-
-
-
 
     @staticmethod
     def fix_url_slash(path: str):

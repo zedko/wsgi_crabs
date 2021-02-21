@@ -15,8 +15,39 @@
       </div>
     </section>
 
-{% include 'includes/all_courses.html' %}
+
+<div class="row">
+  {% for prof in professions.values() %}
+  <div class="col-md-6 col-lg-4 menu-wrap">
+    <div class="heading-menu text-center ftco-animate fadeInUp ftco-animated">
+      <br/>
+      <h3>{{ prof.title }}</h3>
+      <span class="price">${{ prof.get_price() }}</span>
+      <br/>
+    </div>
 
 
 
+
+    {% for course in prof.courses_list %}
+
+				<div class="menus d-flex ftco-animate fadeInUp ftco-animated">
+					<div class="menu-img img" style="background-image: url({{ static }}{{ course.img }});"></div>
+						<div class="text">
+							<div class="d-flex">
+								<div class="one-half">
+									<h3> {{ course.title }}  </h3>
+								</div>
+								<div class="one-forth">
+
+								</div>
+							</div>
+						<p> {{ course.desc }}</p>
+						</div>
+					</div>
+
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
 {% endblock %}

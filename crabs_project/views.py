@@ -1,25 +1,31 @@
+import crabs_project.settings as settings
 from jinja2 import Environment, PackageLoader, select_autoescape
+from crabs_project.models import AppData, Student, Chef
+from mods.loggar import Loggar
+from mods.work_time import work_time
 
-# import crabs_project.settings as settings
+
+log = Loggar()
+# TODO fix save and load pickled data
+app_data = AppData()
+app_data.set_test_data()
+
 
 env = Environment(
     loader=PackageLoader('crabs_project', 'templates'),
     autoescape=select_autoescape(['html', 'xml'])
 )
 
-# TODO find a way to import setting without circular import error
-env.globals['static'] = '/static/'
+env.globals['static'] = settings.STATIC_URL
 
-
+@work_time
 def index(request):
     template = env.get_template('index.html')
-    content = {
-        'name': 'Crabs',
-        'text': 'Blah blah'
-    }
-    print(request['query_string'])
+    content = app_data.get_context_data('courses', 'professions', 'users')
+    content['user'] = app_data.get_active_user()
     content_text = template.render(content)
     status_code = '200 OK'
+    log.info(f'{request["url"]}, {status_code}')
     return content_text, status_code
 
 
@@ -31,9 +37,8 @@ def non_index(request):
 
 def participate(request):
     template = env.get_template('participate.html')
-    content = {
-
-    }
+    content = app_data.get_context_data('courses', 'professions', 'users')
+    content['user'] = app_data.get_active_user()
     content_text = template.render(content)
     status_code = '200 OK'
     if request['method'] == 'POST':
@@ -42,12 +47,25 @@ def participate(request):
 
 
 def courses(request):
+    # TODO make buying courses awailible in all functions
+    print(request)
+    if request['method'] == 'GET':
+        try:
+            course_title = request['query_string']['course']
+            course = app_data.get_course(course_title)
+            user = app_data.get_active_user()
+            if isinstance(user, Student):
+                user.buy_course(course)
+            if isinstance(user, Chef):
+                user.authorize_for_course(course)
+        except TypeError:
+            pass
+    if request['method'] == 'POST':
+        course_data = request['body']
+        app_data.add_course(**course_data)
     template = env.get_template('courses.html')
-    content = {
-        'name': 'Crabs',
-        'text': 'Blah blah'
-    }
-    print(request['query_string'])
+    content = app_data.get_context_data('courses', 'users')
+    content['user'] = app_data.get_active_user()
     content_text = template.render(content)
     status_code = '200 OK'
     return content_text, status_code
@@ -55,11 +73,18 @@ def courses(request):
 
 def professions(request):
     template = env.get_template('professions.html')
-    content = {
-        'name': 'Crabs',
-        'text': 'Blah blah'
-    }
-    print(request['query_string'])
+    content = app_data.get_context_data('professions', 'users')
+    content['user'] = app_data.get_active_user()
+
     content_text = template.render(content)
     status_code = '200 OK'
     return content_text, status_code
+
+
+def buy_course(request):
+    for __, _ in request.items():
+        print(__, _)
+    if request['method'] == 'POST':
+        print('ALRIGHT')
+
+
