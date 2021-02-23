@@ -139,6 +139,8 @@ class App:
         # print(f'{request["method"]} request to {request["url"]}')
 
         if url_path in self.router.keys():
+            if url_path.startswith('/api/'):
+                content_type = "application/json"
             data, status = self.request_handlers[request['method']](url_path, request)
             binary_data = data.encode(encoding='utf-8')
         # static delivery
@@ -150,6 +152,7 @@ class App:
             data, status = response_404(request)
             binary_data = data.encode(encoding='utf-8')
 
+        # TODO need to make Response entity that contains all needed for response attributes
         start_response(status, [
             ("Content-Type", content_type),
             # ("Content-Length", str(len(data))),

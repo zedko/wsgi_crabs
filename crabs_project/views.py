@@ -2,6 +2,8 @@ import crabs_project.settings as settings
 from framework.wsgi import App
 from framework.render import render
 from crabs_project.models import AppData, Student, Chef
+from framework.wsgi_cbv import BaseView
+from framework.serialize import JsonSerializer
 from mods.loggar import Loggar
 from mods.work_time import work_time
 
@@ -15,14 +17,24 @@ static_url = settings.STATIC_URL
 jinja_loader_params = ('crabs_project', 'templates')
 
 
-@work_time
-def index(request):
-    content = app_data.get_context_data('courses', 'professions', 'users')
-    content['user'] = app_data.get_active_user()
-    content_text = render('index.html', loader_params=jinja_loader_params, static_url=static_url, **content)
-    status_code = '200 OK'
-    log.info(f'{request["url"]}, {status_code}')
-    return content_text, status_code
+class IndexPage(BaseView):
+    template = 'index.html'
+
+    def get_context(self) -> dict:
+        content = app_data.get_context_data('courses', 'professions', 'users')
+        content['user'] = app_data.get_active_user()
+        print("REQUEST_DATA: -----> ", self.request)
+        print("CONTENT: -----> ", content)
+        return content
+
+# @work_time
+# def index(request):
+#     content = app_data.get_context_data('courses', 'professions', 'users')
+#     content['user'] = app_data.get_active_user()
+#     content_text = render('index.html', loader_params=jinja_loader_params, static_url=static_url, **content)
+#     status_code = '200 OK'
+#     log.info(f'{request["url"]}, {status_code}')
+#     return content_text, status_code
 
 
 def non_index(request):
@@ -70,6 +82,14 @@ def professions(request):
     content['user'] = app_data.get_active_user()
 
     content_text = render('professions.html', loader_params=jinja_loader_params, static_url=static_url, **content)
+    status_code = '200 OK'
+    return content_text, status_code
+
+
+@work_time
+def api_courses(request):
+    json_ = JsonSerializer(app_data.courses).serialize()
+    content_text = json_
     status_code = '200 OK'
     return content_text, status_code
 
