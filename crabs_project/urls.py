@@ -7,6 +7,6 @@ router = {
     '/participate/': views.participate,
     '/courses/': views.courses,
     '/professions/': views.professions,
-
+    '/api/courses/': views.api_courses,
 }
 

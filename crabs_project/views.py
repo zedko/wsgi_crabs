@@ -3,6 +3,7 @@ from framework.wsgi import App
 from framework.render import render
 from crabs_project.models import AppData, Student, Chef
 from framework.wsgi_cbv import BaseView
+from framework.serialize import JsonSerializer
 from mods.loggar import Loggar
 from mods.work_time import work_time
 
@@ -81,6 +82,14 @@ def professions(request):
     content['user'] = app_data.get_active_user()
 
     content_text = render('professions.html', loader_params=jinja_loader_params, static_url=static_url, **content)
+    status_code = '200 OK'
+    return content_text, status_code
+
+
+@work_time
+def api_courses(request):
+    json_ = JsonSerializer(app_data.courses).serialize()
+    content_text = json_
     status_code = '200 OK'
     return content_text, status_code
 

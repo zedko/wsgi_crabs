@@ -1,4 +1,4 @@
-import json
+import jsonpickle
 
 
 class JsonSerializer:
@@ -6,18 +6,8 @@ class JsonSerializer:
         self.data = data
 
     def serialize(self) -> str:
-        data = self._collect_dict()
-        return json.dumps(data)
-
-    def _collect_dict(self):
-        data = self.data
-        try:
-            data = data.__dict__
-        except AttributeError:
-            if not isinstance(data, dict):
-                raise TypeError(f'Cannot serialize {type(data)}. Provide an instance of class or dict')
-        print(type(data), data)
-        return data
+        self._include_exclude()
+        return jsonpickle.dumps(self.data, unpicklable=False)
 
     # TODO add include / exclude keys ability.
     def _include_exclude(self):
@@ -25,8 +15,9 @@ class JsonSerializer:
 
 
 if __name__ == '__main__':
-    from crabs_project.models import KitchenCourse
-
+    from crabs_project.models import KitchenCourse, AppData
+    real_data = AppData()
+    real_data.set_test_data()
 
     test_dict = {
         "key": "value",
@@ -40,8 +31,10 @@ if __name__ == '__main__':
     a = JsonSerializer(test_dict)
     b = JsonSerializer(test_class)
     c = JsonSerializer(test_string)
+    x = JsonSerializer(real_data.courses)
 
     print('dict: ', a.serialize())
     print('course: ', b.serialize())
     print('string', c.serialize())
+    print('real data: ', x.serialize())
 
