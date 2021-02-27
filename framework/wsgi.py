@@ -107,18 +107,18 @@ CONTENT_TYPES_MAP = {
 
 class App:
     router = {}
+    settings = None
 
-    def __init__(self, settings, routes: dict=None, middleware:list=None):
-        self.settings = settings
+    def __init__(self, routes: dict=None, middleware:list=None):
         self.router = {**App.router, **routes}
-        self.middleware = middleware if middleware else self.settings.MIDDLEWARE
+        self.middleware = middleware if middleware else App.settings.MIDDLEWARE
         self.request_handlers = {
             'GET': self.GET_request_handler,
             'POST': self.POST_request_handler,
         }
 
     def __call__(self, environ, start_response):
-        if self.settings.DEBUG:
+        if App.settings.DEBUG:
             print('=' * 10)
             for (key, value) in environ.items():
                 print(key, value)
@@ -230,5 +230,6 @@ if __name__ == '__main__':
     import crabs_project.settings as proj_settings
     from crabs_project.urls import router
     from crabs_project.middleware import middleware_list
-    app = App(proj_settings, routes=router, middleware=middleware_list)
+    App.settings = proj_settings
+    app = App(routes=router, middleware=middleware_list)
 

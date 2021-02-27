@@ -14,3 +14,6 @@ MIDDLEWARE = crabs_project.middleware.middleware_list
 LOGGER = Loggar()
 LOGGER.set_file(os.path.join(ROOT_DIR, 'log.log'))
 LOGGER.set_level('info')
+
+SQLITE_DB_NAME = 'db.sqlite'
+DATABASE_CONNECT = os.path.join(ROOT_DIR, SQLITE_DB_NAME)

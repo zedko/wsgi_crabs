@@ -11,7 +11,7 @@ from os import path
 class Course(PrototypeMixin):
     def __init__(self, title: str, desc: str = '', price: float = 0, image_url: str = 'images/breakfast-1.jpg'):
         self.title = title
-        self.desc = desc
+        self.description = desc
         self.price = price
         self.img = image_url
 
@@ -93,6 +93,7 @@ class Profession:
 # USERS
 class User:
     def __init__(self, name, email):
+        self.id: int
         self.name = name
         self.email = email
         self.role = None
@@ -101,6 +102,9 @@ class User:
 
     @staticmethod
     def create_user(type_: str, *args, **kwargs):
+        """
+        Users Fabric. Provide 'type', 'name', 'email' -> get new subclass User
+        """
         USERS = {
             'student': Student,
             'chef': Chef,
